@@ -4,6 +4,7 @@
 
 import networkx as nx               # 调用各种图算法的计算，通过调用python画图包matplotlib能实现图的可视化。
 import os                           # 包含普遍的操作系统功能
+import Image
 
 class MyGraph:
     def __init__(self):
@@ -15,11 +16,14 @@ class MyGraph:
         return str(self.first) + '--' + str(self.graph[self.first]) + '--' + str(self.last)
 
 
-# 将 nfa 存储成 .dot 文件
-def storeAsDot(mg, name='nfa'):
+# 将 nfa 存储成 .dot 文件，再转成图片
+def storeAsPNG(mg, name='nfa'):
+    nx.draw_graphviz(mg)
     nx.write_dot(mg, name + '.dot')
+    os.system('dot -Tpng ' + name + '.dot -o ' + name + '.png')
+    os.system('open ' + name + '.png')
 
-
+# 确保节点的标号不同
 next_node = -1
 def nextNode():
     global next_node
@@ -27,9 +31,10 @@ def nextNode():
     return next_node
 
 
-# 处理 圆括号 ()
+# 处理圆括号()，返回右圆括号)的位置
 def findParenthesis(string, pos):
-    temp, i = -1, pos
+    temp = -1
+    i = pos
     while i != len(string) and temp != 0:
         if string[i] == '(':
             temp -= 1
@@ -41,19 +46,46 @@ def findParenthesis(string, pos):
     raise Exception("无法找到对应的圆括号")
 
 
-# 处理 方括号 []
-def findSquareBrackets(string, pos):
-    temp = -1
-    i = pos
-    while i != len(string) and temp != 0:
+# 处理方括号[]，将方括号中的内容转成『或』的形式
+def convertSquareBrackets(string):
+    i = 0
+    small = ''
+    big = ''
+    m = 0
+    n = 0
+    newstr = ""
+    flag = False    # 是否进入方括号内
+    while i != len(string):
         if string[i] == '[':
-            temp -= 1
-        if string[i] == ']':
-            temp += 1
-            if temp == 0:
-                return i
+            newstr += '('
+            flag = True
+        elif string[i] == ']':
+            newstr += ')'
+            flag = False
+        elif string[i] == '-':    # 必然出现在方括号内
+            small = string[i-1]
+            big = string[i+1]
+            m = ord(small)
+            n = ord(big)
+            for j in range(m, n+1):
+                if j == n and string[i+2] == ']':
+                    newstr += chr(j)
+                else:
+                    newstr += chr(j)
+                    newstr += "|"
+        else:
+            if flag == False:   # 方括号外
+                newstr += string[i]
+            if flag == True:    # 方括号内
+                if string[i-1] != '-' and string[i+1] != '-':
+                    if string[i+1] == ']':
+                        newstr += string[i]
+                    else:
+                        newstr += string[i]
+                        newstr += '|'
         i += 1
-    raise Exception("无法找到对应的方括号")   
+    return newstr
+    raise Exception("神秘字符出现在了不该出现的位置")
 
 
 def convertTerminal2MG(terminal):
@@ -89,12 +121,10 @@ def convert(input_str):
             if char == '|':
                 mg_stack.append(char)
                 i += 1
-            if char == '['
-            
-                i += 1
         elif isTerminalSymbol(char):
             mg_stack.append(convertTerminal2MG(char))
             i += 1
+
     ret_mg = MyGraph()
     ret_mg.first = nextNode()
     ret_mg.last = nextNode()
@@ -143,7 +173,7 @@ def concat(mg1, mg2):
 
 # 控制符
 def controlSymbols():
-    return ['[', ']', '(', ')', '*', '|']
+    return ['(', ')', '*', '|']
 
 
 # 是控制符？
@@ -170,8 +200,9 @@ def re2nfa(input_str):
 
 if __name__ == '__main__':
     re = raw_input('Regular Expression: ')
+    re = convertSquareBrackets(re)
     nfa = re2nfa(re)
-    storeAsDot(nfa.graph)
+    storeAsPNG(nfa.graph)
     NFA = {}
     for node, nbrsdict in nfa.graph.adjacency_iter():
         EDGE = {}
