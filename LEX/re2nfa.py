@@ -208,9 +208,10 @@ if __name__ == '__main__':
         EDGE = {}
         NBR = []
         for nbr, attr in nbrsdict.items():
-            label = attr[0]['label']
-            NBR.append(nbr)
-        EDGE[label] = NBR
+            try:
+                EDGE[attr[0]['label']].append(nbr)
+            except:
+                EDGE[attr[0]['label']] = [nbr]
         NFA[node] = EDGE
 
 print NFA
