@@ -70,15 +70,15 @@ class Token():
             self.value = value
 
 # 总控程序
-def allControl(input_stack):
-    state_stack  = []        # 状态栈
-    symbol_stack = []        # 符号栈
-    value_stack  = []        # 值栈
+def allControl(input_stack): # 输入栈 Token型   
+    state_stack  = []        # 状态栈 整型
+    symbol_stack = []        # 符号栈 字符串型
+    value_stack  = []        # 值栈   整型或字符串型
     pointer      = 0         # 输入串的读头
     move         = ""        # 总控程序的动作
 
     state_stack.append(0)             # 状态栈的初始状态为0
-    symbol_stack.append(Token('$'))   # 符号栈的栈底符为 $
+    symbol_stack.append('$')   # 符号栈的栈底符为 $
     input_stack.append(Token('$'))    # 输入Token栈以 $ 结尾
 
     print "%-30s%-30s%-30s%-30s%-30s" %("State Stack", "Symbol Stack", "Input Token", "Value Stack", "Move")
@@ -86,7 +86,7 @@ def allControl(input_stack):
     # 开始分析输入串，总控程序每做一个动作循环一次
     while 1:
         state_string  = ' '.join(map(str, state_stack))                                          # 状态栈转成字符串
-        symbol_string = ' '.join(symbol_stack[i].name for i in range(len(symbol_stack)))         # 符号栈转成字符串
+        symbol_string = ' '.join(symbol_stack)                                                   # 符号栈转成字符串
         input_string  = ' '.join(input_stack[i].name for i in range(pointer, len(input_stack)))  # 输入Token栈转成字符串
         value_string  = ''
         for i in range(len(value_stack)):
@@ -115,7 +115,7 @@ def allControl(input_stack):
         # Shift
         if action == 'S':
             state_stack.append(number)              # 移进的目标状态压入状态栈
-            symbol_stack.append(input_token)        # 当前读入符压入符号栈
+            symbol_stack.append(input_token.name)        # 当前读入符压入符号栈
             value_stack.append(input_token.value)   # 当前读入符的值压入值栈
             move = symbol_in_table + " Shift"       # 当前动作为『移进』
             pointer += 1                            # 读头前进一格
@@ -136,7 +136,7 @@ def allControl(input_stack):
                     continue
                 else:
                     temp_production_right = ''.join(grammar_rule[number][i])         # 归约产生式第 i 个右部转成字符串
-                    temp_symbol_string    = ''.join(symbol_stack[j].name for j in range(len(symbol_stack)-len_right, len(symbol_stack)))  # 符号栈最后 len_right 个元素转成字符串
+                    temp_symbol_string    = ''.join(symbol_stack[-len_right:])  # 符号栈最后 len_right 个元素转成字符串
 
                     if temp_production_right in temp_symbol_string:        # 用于归约的产生式右部
                         reduce_error = False                               # 产生式没有错误
@@ -150,7 +150,7 @@ def allControl(input_stack):
 
                         # 弹出栈顶的 len_right 项
                         for j in range(len_right):
-                            temp_symbol = symbol_stack.pop()
+                            symbol_stack.pop()
                             state_stack.pop()
                             temp_value = value_stack.pop()
                             p.append(temp_value)
@@ -158,7 +158,7 @@ def allControl(input_stack):
                         # 语义动作 p[0]保存当前归约产生式运算后的结果
                         func_rule[number](p)
 
-                        symbol_stack.append(Token(production_left, p[0]))     # 将产生式左部和对应的值压入符号栈中
+                        symbol_stack.append(production_left)     # 将产生式左部和对应的值压入符号栈中
                         value_stack.append(p[0])                 # 归约完的值压入值栈
                         temp_current_state = state_stack[-1]     # 当前状态为状态栈栈顶元素
 
