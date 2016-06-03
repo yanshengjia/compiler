@@ -181,5 +181,5 @@ def allControl(input_stack): # 输入栈 Token型
 
 
 if __name__ == "__main__":
-    TokenArr = [Token('number',2), Token('+'), Token('number',2), Token('*'), Token('number',3)]
+    TokenArr = [Token('number',2), Token('*'), Token('number',2), Token('+'), Token('number',3)]
     allControl(TokenArr)
