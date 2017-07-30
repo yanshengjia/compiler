@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2016/12/4 下午2:18
-# @Author  : Zhixin Piao
-# @Email   : piaozhx@seu.edu.cn
+# @Time    : 2016/12/4 下午1:31
+# @Author  : Zhixin Piao, Shengjia Yan, Ruiming Wang
+# @Email   : piaozhx@seu.edu.cn, sjyan@seu.edu.cn, wangruiming@seu.edu.cn
 
 import networkx as nx
 import pydot
