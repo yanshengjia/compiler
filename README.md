@@ -1,3 +1,3 @@
 # Compiler
 
-LEX & YACC for Cminus
+Python Implementation of LEX & YACC for Cminus
